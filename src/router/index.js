@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Project from '@/components/project/project'
+import Project from '@/components/project/index'
 
 Vue.use(Router)
 
@@ -10,6 +10,6 @@ export default new Router({
       path: '/',
       name: 'project',
       component: Project
-    }
+    },
   ]
 })
