@@ -3,7 +3,7 @@
   <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
     <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn"></task-curve-path>
-    <task-common-node v-for="item in nodes" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectlMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
+    <task-common-node :class="{ isSelected: isSelected }" v-for="item in nodes" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectlMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
   </task-work-area>
 </template>
 
@@ -16,6 +16,7 @@ export default {
   },
   data() {
     return {
+      isSelected: false,//节点是否选中
       work_id: 'work_id',//工作区id
       ini: {
         lineType: {
@@ -31,7 +32,14 @@ export default {
           default: {ZoomX: 1, ZoomY: 1}
         }
       },
-      paths:[],
+      paths:[
+        {
+          dotted: false,
+          ptype: "Q",
+          startPort: "node1_4",
+          endPort: "node2_1",
+        }
+      ],
       nodes: [],
       startNode: {}
     }
@@ -43,14 +51,35 @@ export default {
     }
   },
   mounted() {
-
   },
   methods: {
+    selectlMethod(event, node, ref) {
+      console.log('节点选中', event, node, ref)
+      this.isSelected = !this.isSelected
+      if(this.isSelected) {
+        document.onkeydown = this.checkdelete
+      }
+    },
+    checkdelete(e) {
+      let event = window.event || e
+      let code = event.which || event.keyCode
+      if(code === 46) {
+        console.log('刚按了delete键')
+      }
+
+    },
     addNodeModel (event, node) {
       console.log('添加节点', event, event.clientX, event.clientY)
       let newNode = {}
       newNode = node
-      newNode.id = 'node' + Math.floor(Math.random() * 100)
+      newNode.id = 'node' + Math.floor(Math.random() * 100)//最终使用由后端返回id
+      //生成锚点id
+      newNode.inPorts.forEach(item => {
+        item.id =  `${newNode.id}_in_${item.type}`
+      })
+      newNode.outPorts.forEach(item => {
+        item.id =  `${newNode.id}_out_${item.type}`
+      })
       newNode.positionX = node.positionX - 90 // -15 -90 定位到节点的终点
       newNode.positionY = node.positionY - 15
       // newNode.state = "success",
@@ -64,9 +93,6 @@ export default {
     },
     mouseOutFn (event, portData) {
       console.log('mouseFn', 'on-mouse-out', '鼠标划出路径事件', event, portData)
-    },
-    selectlMethod (event, data, node) {
-      console.log('selectlMethod', 'on-select', '节点左键点击事件', event, data, node)
     },
     dragStart (event, node) {
       let nodeData = event.dataTransfer.getData("nodedata")
@@ -96,22 +122,23 @@ export default {
       })
     },
     addPath (event, startData, endData) {
-      console.log('添加路径', event, startData, endData)
-      this.nodes.forEach(item => {
+      if(startData.split('_')[2] === endData.split('_')[2]) {
+        this.nodes.forEach(item => {
         item.inPorts.forEach(ins => {
           if (ins.id === endData) {
-            ins.isConnected = true;
+            ins.isConnected = true
           }
-        });
-      });
-      setTimeout(() =>  {
-        this.paths.push({
-          dotted: this.vconfig.dotted,
-          ptype: this.vconfig.pathType,
-          startPort: startData,
-          endPort: endData
-        });
-      }, 200);
+        })
+      })
+        setTimeout(() =>  {
+          this.paths.push({
+            dotted: this.vconfig.dotted,
+            ptype: this.vconfig.pathType,
+            startPort: startData,
+            endPort: endData
+          });
+        }, 200);
+      }
     },
     updateCompleted () {
       console.log('updateCompleted!!')
@@ -124,13 +151,19 @@ export default {
     },
     mouseNodeMenu (event, node) {
       console.log('mouseNodeMenu', 'on-mouse', '节点右击事件', event, node)
-    }
+    },
+
   }
 }
 </script>
 
-<style>
+<style lang="less" scoped>
 
 </style>
+
+<style lang="less">
+  @import "./style/task-common-node.less";
+</style>
+
 
 

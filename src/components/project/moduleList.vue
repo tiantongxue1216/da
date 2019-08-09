@@ -14,69 +14,118 @@ export default {
     return {
       nodeModels: [
         {
-          id: 'nodeo',
-          name: '节点o',
+          id: 'node0',
+          name: '节点0',
           inPorts: [{
-            id: 'node1_1',
+            type: '1',
             isConnected: false
           },
           {
-            id: 'node1_2',
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }],
           outPorts: [{
-            id: 'node1_3',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }]
         },
         {
-          id: '12',
-          name: 'SQL',
+          id: 'node1',
+          name: '节点1',
           inPorts: [{
-            id: 'node2_1',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }],
           outPorts: [{
-            id: 'node2_2',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }]
         },
         {
-          id: '13',
-          name: 'WorkData',
+          id: 'node2',
+          name: '节点2',
           inPorts: [{
-            id: 'node3_1',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }],
-          outPorts: [{
-            id: 'node3_2',
+          outPorts: [
+            {
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }]
         },
         {
-          id: '14',
-          name: 'TableToTV',
+          id: 'node3',
+          name: '节点3',
           inPorts: [{
-            id: 'node4_1',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }],
           outPorts: [{
-            id: 'node4_2',
+            type: '1',
+            isConnected: false
+          },
+          {
+            type: '2',
+            isConnected: false
+          },
+          {
+            type: '3',
             isConnected: false
           }]
         },
-        {
-          id: '15',
-          name: '增加系列',
-          inPorts: [{
-            id: 'node4_1',
-            isConnected: false
-          }],
-          outPorts: [{
-            id: 'node4_2',
-            isConnected: false
-          }]
-        }
       ],
     }
   }
