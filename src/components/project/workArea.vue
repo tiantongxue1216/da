@@ -3,12 +3,13 @@
   <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
     <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn"></task-curve-path>
-    <task-common-node v-for="item in nodes" :class="{'isSelected': selected_node_id===item.id}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
+    <task-common-node v-for="item in nodes" :class="{'isSelected': (selected_node_ids.indexOf(item.id)!==-1)}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
   </task-work-area>
 </template>
 
 <script>
 import node from './node'
+import { timeout } from 'q';
 
 export default {
   components: {
@@ -18,7 +19,9 @@ export default {
     return {
       work_id: 'work_id',//工作区id
       isSelected: false,//节点是否被选中
-      selected_node_id: '',//点击选择的节点的id
+      // selected_node_id: '',//点击选择的节点的id
+      selected_node_ids: [],//支持多选时存储选中的节点的id
+      IsShiftOrCtrDown: false,//是否按下shift或者ctr键
       ini: {
         lineType: {
           type: [String],
@@ -49,29 +52,50 @@ export default {
     //当前连接线的数据信息
     vconfig() {
       return this.$store.getters.getViConfig;
-    }
+    },
   },
   mounted() {
+    document.addEventListener('keydown',this.checkKeyDown)
+    document.addEventListener('keyup', this.checkKeyUp)
   },
   methods: {
     selectMethod(event, node, ref) {
-      this.selected_node_id = node.id
-      document.addEventListener('keydown', this.checkdelete)
+      if(this.IsShiftOrCtrDown) {
+        this.selected_node_ids.push(node.id)
+      }else {
+        this.selected_node_ids = []
+        this.selected_node_ids[0] = node.id
+      }
+      document.addEventListener('keydown', this.checkKeyDown)
     },
-    checkdelete(e) {
+    checkKeyDown(e) {
       let event = window.event || e
       let code = event.which || event.keyCode
-      if(code === 46) {
-        let delIndex = this.findIndexOfArr(this.nodes,this.selected_node_id)
-       //删除选中节点
+      if(code === 46) {//按delete键
+        this.delete()
+      }
+      if(code === 16 || code === 17) {//按shift或者ctrl键
+        this.IsShiftOrCtrDown = true
+      }
+    },
+    checkKeyUp(e) {
+      let event = window.event || e
+      let code = event.which || event.keyCode
+      if(code === 16 || code === 17) {
+        this.IsShiftOrCtrDown = false
+      }
+
+    },
+    //删除选中节点以及节点周围的连线
+    delete() {
+      for(let item of this.selected_node_ids) {
+        let delIndex = this.findIndexOfArr(this.nodes, item)
         if(delIndex !== -1) {
-          this.nodes.splice(delIndex,1)
-          //删除节点周围的连线
-          this.paths = this.paths.filter(item => {
-            return (item.startPort.indexOf(this.selected_node_id) === -1 && item.endPort.indexOf(this.selected_node_id) === -1)
+          this.nodes.splice(delIndex, 1)
+          this.paths = this.paths.filter(pathItem => {
+            return (pathItem.startPort.indexOf(item) === -1 && pathItem.endPort.indexOf(item) === -1)
           })
         }
-
       }
     },
     //查找相应id在array中的index
@@ -85,6 +109,7 @@ export default {
       }
       return resIndex
     },
+    //拖拽组件到画布
     addNodeModel (event, node) {
       let newNode = {}
       newNode = node
@@ -112,13 +137,6 @@ export default {
     },
     dragStart (event, node) {
       let nodeData = event.dataTransfer.getData("nodedata")
-      // console.log(
-      //   "节点开始移动",
-      //   event.clientX,
-      //   event.clientY,
-      //   node,
-      //   JSON.parse(nodeData)
-      // )
       this.startNode = {
         id: node.id,
         positionX: event.clientX,
