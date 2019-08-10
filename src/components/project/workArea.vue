@@ -3,7 +3,7 @@
   <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
     <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn"></task-curve-path>
-    <task-common-node :class="{ isSelected: isSelected }" v-for="item in nodes" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectlMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
+    <task-common-node v-for="item in nodes" :class="{'isSelected': selected_node_id===item.id}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
   </task-work-area>
 </template>
 
@@ -16,8 +16,9 @@ export default {
   },
   data() {
     return {
-      isSelected: false,//节点是否选中
       work_id: 'work_id',//工作区id
+      isSelected: false,//节点是否被选中
+      selected_node_id: '',//点击选择的节点的id
       ini: {
         lineType: {
           type: [String],
@@ -53,26 +54,41 @@ export default {
   mounted() {
   },
   methods: {
-    selectlMethod(event, node, ref) {
-      console.log('节点选中', event, node, ref)
-      this.isSelected = !this.isSelected
-      if(this.isSelected) {
-        document.onkeydown = this.checkdelete
-      }
+    selectMethod(event, node, ref) {
+      this.selected_node_id = node.id
+      document.addEventListener('keydown', this.checkdelete)
     },
     checkdelete(e) {
       let event = window.event || e
       let code = event.which || event.keyCode
       if(code === 46) {
-        console.log('刚按了delete键')
-      }
+        let delIndex = this.findIndexOfArr(this.nodes,this.selected_node_id)
+       //删除选中节点
+        if(delIndex !== -1) {
+          this.nodes.splice(delIndex,1)
+          //删除节点周围的连线
+          this.paths = this.paths.filter(item => {
+            return (item.startPort.indexOf(this.selected_node_id) === -1 && item.endPort.indexOf(this.selected_node_id) === -1)
+          })
+        }
 
+      }
+    },
+    //查找相应id在array中的index
+    findIndexOfArr(array,id) {
+      let resIndex = -1
+      for(let index in array) {
+        if(array[index].id === id) {
+          resIndex = index
+          break
+        }
+      }
+      return resIndex
     },
     addNodeModel (event, node) {
-      console.log('添加节点', event, event.clientX, event.clientY)
       let newNode = {}
       newNode = node
-      newNode.id = 'node' + Math.floor(Math.random() * 100)//最终使用由后端返回id
+      newNode.id = 'node' + (new Date()).getTime()//最终使用由后端返回id
       //生成锚点id
       newNode.inPorts.forEach(item => {
         item.id =  `${newNode.id}_in_${item.type}`
@@ -123,21 +139,21 @@ export default {
     },
     addPath (event, startData, endData) {
       if(startData.split('_')[2] === endData.split('_')[2]) {
-        this.nodes.forEach(item => {
-        item.inPorts.forEach(ins => {
-          if (ins.id === endData) {
-            ins.isConnected = true
-          }
-        })
-      })
-        setTimeout(() =>  {
-          this.paths.push({
-            dotted: this.vconfig.dotted,
-            ptype: this.vconfig.pathType,
-            startPort: startData,
-            endPort: endData
-          });
-        }, 200);
+      //   this.nodes.forEach(item => {
+      //   item.inPorts.forEach(ins => {
+      //     if (ins.id === endData) {
+      //       ins.isConnected = true
+      //     }
+      //   })
+      // })
+      setTimeout(() =>  {
+        this.paths.push({
+          dotted: this.vconfig.dotted,
+          ptype: this.vconfig.pathType,
+          startPort: startData,
+          endPort: endData
+        });
+      }, 200);
       }
     },
     updateCompleted () {

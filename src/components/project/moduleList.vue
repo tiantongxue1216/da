@@ -18,27 +18,27 @@ export default {
           name: '节点0',
           inPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }],
           outPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }]
         },
         {
@@ -46,27 +46,27 @@ export default {
           name: '节点1',
           inPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }],
           outPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }]
         },
         {
@@ -74,28 +74,28 @@ export default {
           name: '节点2',
           inPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }],
           outPorts: [
             {
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }]
         },
         {
@@ -103,27 +103,27 @@ export default {
           name: '节点3',
           inPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }],
           outPorts: [{
             type: '1',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '2',
-            isConnected: false
+            // isConnected: false
           },
           {
             type: '3',
-            isConnected: false
+            // isConnected: false
           }]
         },
       ],
