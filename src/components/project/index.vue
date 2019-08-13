@@ -25,6 +25,7 @@ import workArea from './workArea'
       return {
       }
     },
+
     methods: {
 
     }

@@ -2,25 +2,24 @@
   <!-- <task-work-area width='100%' height='100%' id="areaID" @on-drag-over="dragOver" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'> -->
   <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
-    <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn"></task-curve-path>
-    <task-common-node v-for="item in nodes" :class="{'isSelected': (selected_node_ids.indexOf(item.id)!==-1)}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
+    <!-- <task-curve-path :class="{'pathIsSelected': pathIsSelected}" :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn" @click="handlePathClick"></task-curve-path> -->
+    <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn" @on-click="pathClickFn"></task-curve-path>
+    <task-common-node v-for="item in nodes" :class="{'nodeIsSelected': (selected_node_ids.indexOf(item.id)!==-1)}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
   </task-work-area>
 </template>
 
 <script>
-import node from './node'
 import { timeout } from 'q';
 
 export default {
   components: {
-    node,
   },
   data() {
     return {
       work_id: 'work_id',//工作区id
-      isSelected: false,//节点是否被选中
-      // selected_node_id: '',//点击选择的节点的id
-      selected_node_ids: [],//支持多选时存储选中的节点的id
+      curr_selected_path: [],//当前选中连接线
+      selected_paths: [],//选中连线的[startPor, endPort]
+      selected_node_ids: [],//储选中的节点的id
       IsShiftOrCtrDown: false,//是否按下shift或者ctr键
       ini: {
         lineType: {
@@ -53,12 +52,23 @@ export default {
     vconfig() {
       return this.$store.getters.getViConfig;
     },
+    pathIsSelected() {
+      let pathIsSelected = false
+      for(let item of this.selected_paths) {
+        if(item[0] === this.curr_selected_path[0] && item[1] === this.curr_selected_path[1]) {
+          pathIsSelected = true
+          break
+        }
+      }
+      return pathIsSelected
+    }
   },
   mounted() {
     document.addEventListener('keydown',this.checkKeyDown)
     document.addEventListener('keyup', this.checkKeyUp)
   },
   methods: {
+    //节点选中事件
     selectMethod(event, node, ref) {
       if(this.IsShiftOrCtrDown) {
         this.selected_node_ids.push(node.id)
@@ -66,25 +76,6 @@ export default {
         this.selected_node_ids = []
         this.selected_node_ids[0] = node.id
       }
-      document.addEventListener('keydown', this.checkKeyDown)
-    },
-    checkKeyDown(e) {
-      let event = window.event || e
-      let code = event.which || event.keyCode
-      if(code === 46) {//按delete键
-        this.delete()
-      }
-      if(code === 16 || code === 17) {//按shift或者ctrl键
-        this.IsShiftOrCtrDown = true
-      }
-    },
-    checkKeyUp(e) {
-      let event = window.event || e
-      let code = event.which || event.keyCode
-      if(code === 16 || code === 17) {
-        this.IsShiftOrCtrDown = false
-      }
-
     },
     //删除选中节点以及节点周围的连线
     delete() {
@@ -109,6 +100,56 @@ export default {
       }
       return resIndex
     },
+
+    //点击连接线事件
+    pathClickFn(event, portData) {
+      this.curr_selected_path = portData
+      if(this.IsShiftOrCtrDown) {
+        this.selected_paths.push(portData)
+      }else {
+        this.selected_paths = []
+        this.selected_paths[0] = portData
+      }
+      console.log('左击连线事件', event, portData)
+    },
+    //删除连线
+    deletePaths() {
+      for(let item of this.selected_paths) {
+        let delIndex = this.findPathIndexOfArr(this.paths, item)
+        if(delIndex !== -1) {
+          this.paths.splice(delIndex, 1)
+        }
+      }
+    },
+    //查找[startPort, endPort]在paths中的index
+    findPathIndexOfArr(array ,item) {
+      let resIndex = -1
+      for(let index in array) {
+        if((array[index].startPort === item.startPort) && (array[index].endPort === item.endPort)) {
+          resIndex = index
+          break
+        }
+      }
+      return resIndex
+    },
+    checkKeyDown(e) {
+      let event = window.event || e
+      let code = event.which || event.keyCode
+      if(code === 46) {//按delete键
+        // this.delete()
+        this.deletePaths()
+      }
+      if(code === 16 || code === 17) {//按shift或者ctrl键
+        this.IsShiftOrCtrDown = true
+      }
+    },
+    checkKeyUp(e) {
+      let event = window.event || e
+      let code = event.which || event.keyCode
+      if(code === 16 || code === 17) {
+        this.IsShiftOrCtrDown = false
+      }
+    },
     //拖拽组件到画布
     addNodeModel (event, node) {
       let newNode = {}
@@ -129,6 +170,7 @@ export default {
     mouseFn (event, portData) {
       console.log('mouseFn', 'on-mouse', '鼠标右击路径事件', event, portData)
     },
+    //鼠标划入路径事件
     mouseOverFn (event, portData) {
       console.log('mouseFn', 'on-mouse-over', '鼠标划入路径事件', event, portData)
     },
@@ -196,7 +238,7 @@ export default {
 </style>
 
 <style lang="less">
-  @import "./style/task-common-node.less";
+  @import "./style/customStyle.less";
 </style>
 
 
