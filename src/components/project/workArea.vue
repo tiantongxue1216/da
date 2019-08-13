@@ -2,7 +2,6 @@
   <!-- <task-work-area width='100%' height='100%' id="areaID" @on-drag-over="dragOver" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'> -->
   <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
-    <!-- <task-curve-path :class="{'pathIsSelected': pathIsSelected}" :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn" @click="handlePathClick"></task-curve-path> -->
     <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn" @on-click="pathClickFn"></task-curve-path>
     <task-common-node v-for="item in nodes" :class="{'nodeIsSelected': (selected_node_ids.indexOf(item.id)!==-1)}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
   </task-work-area>
@@ -78,7 +77,7 @@ export default {
       }
     },
     //删除选中节点以及节点周围的连线
-    delete() {
+    deleteNodes() {
       for(let item of this.selected_node_ids) {
         let delIndex = this.findIndexOfArr(this.nodes, item)
         if(delIndex !== -1) {
@@ -110,7 +109,6 @@ export default {
         this.selected_paths = []
         this.selected_paths[0] = portData
       }
-      console.log('左击连线事件', event, portData)
     },
     //删除连线
     deletePaths() {
@@ -121,7 +119,7 @@ export default {
         }
       }
     },
-    //查找[startPort, endPort]在paths中的index
+    //查找当前某一项在选中路径中的index
     findPathIndexOfArr(array ,item) {
       let resIndex = -1
       for(let index in array) {
@@ -136,7 +134,7 @@ export default {
       let event = window.event || e
       let code = event.which || event.keyCode
       if(code === 46) {//按delete键
-        // this.delete()
+        this.deleteNodes()
         this.deletePaths()
       }
       if(code === 16 || code === 17) {//按shift或者ctrl键
