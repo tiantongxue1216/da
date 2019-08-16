@@ -1,6 +1,6 @@
 <template>
   <!-- <task-work-area width='100%' height='100%' id="areaID" @on-drag-over="dragOver" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'> -->
-  <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" ref="area" :ini='ini'>
+  <task-work-area width='100%' height='100%' :id="work_id" @on-mouse="mouseMenu" @on-add-nodemodel="addNodeModel" @on-mouse-wheel="mouseWheel" ref="area" :ini='ini'>
     <!--节点间连线依赖<task-curve-path>组件，所以该组件必需添加的，之后我会使用其他方法替代此组件-->
     <task-curve-path :areaid="work_id" :paths="paths" ref="curve" @on-mouse="mouseFn" @on-mouse-over="mouseOverFn" @on-mouse-out="mouseOutFn" @on-click="pathClickFn"></task-curve-path>
     <task-common-node v-for="item in nodes" :class="{'nodeIsSelected': (selected_node_ids.indexOf(item.id)!==-1)}" :ref="'node'+item.id" :node='item' :key="item.id" @on-add-path="addPath" @on-select="selectMethod" @on-drag-start="dragStart" @on-drag-ging="dragGing" @on-drag-end="dragEnd" :updateTem="updateCompleted" @on-mouse="mouseNodeMenu"></task-common-node>
@@ -20,19 +20,24 @@ export default {
       selected_paths: [],//选中连线的[startPor, endPort]
       selected_node_ids: [],//储选中的节点的id
       IsShiftOrCtrDown: false,//是否按下shift或者ctr键
+      // ini: {
+      //   lineType: {
+      //     type: [String],
+      //     default: 'Q'
+      //   },
+      //   isDotted: {
+      //     type: [Boolean],
+      //     default: false
+      //   },
+      //   scaling: {
+      //     type: [Object],
+      //     default: {ZoomX: 1, ZoomY: 1}
+      //   }
+      // },
       ini: {
-        lineType: {
-          type: [String],
-          default: 'Q'
-        },
-        isDotted: {
-          type: [Boolean],
-          default: false
-        },
-        scaling: {
-          type: [Object],
-          default: {ZoomX: 1, ZoomY: 1}
-        }
+        lineType: 'Q',
+        isDotted: false,
+        scaling: {ZoomX: 1, ZoomY: 1},
       },
       paths:[
         {
@@ -166,14 +171,28 @@ export default {
       this.nodes.push(newNode)
     },
     mouseFn (event, portData) {
-      console.log('mouseFn', 'on-mouse', '鼠标右击路径事件', event, portData)
+      console.log('画布右击事件')
+    },
+    mouseWheel(event, data) {
+      console.log('鼠标滚动', event, data)
+      if(event.wheelDelta > 0) {
+        this.zoomIn()
+      }else {
+        this.zoomOut()
+      }
+    },
+    zoomIn () {
+      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX + 0.1
+      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY + 0.1
+    },
+    zoomOut () {
+      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX - 0.1
+      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY - 0.1
     },
     //鼠标划入路径事件
     mouseOverFn (event, portData) {
-      console.log('mouseFn', 'on-mouse-over', '鼠标划入路径事件', event, portData)
     },
     mouseOutFn (event, portData) {
-      console.log('mouseFn', 'on-mouse-out', '鼠标划出路径事件', event, portData)
     },
     dragStart (event, node) {
       let nodeData = event.dataTransfer.getData("nodedata")
@@ -184,7 +203,6 @@ export default {
       }
     },
     dragGing (event) {
-      console.log("节点移动中...", event.clientX, event.clientY)
     },
     dragEnd (event, node) {
       // console.log("节点移动结束", event.clientX, event.clientY, node);
@@ -215,16 +233,14 @@ export default {
       }
     },
     updateCompleted () {
-      console.log('updateCompleted!!')
       // 重新加载路径
       this.$refs.curve.vReload()
     },
     //工作区右击事件
     mouseMenu (event, id) {
-      console.log('mouseMenu', 'on-mouse', '工作区右击事件', event, id)
+      console.log('鼠标右击事件', event, id, this.ini.scaling.ZoomX)
     },
     mouseNodeMenu (event, node) {
-      console.log('mouseNodeMenu', 'on-mouse', '节点右击事件', event, node)
     },
 
   }
