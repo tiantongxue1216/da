@@ -7638,9 +7638,9 @@ vm-browserify@^1.0.1:
   integrity sha512-iq+S7vZJE60yejDYM0ek6zg308+UZsdtPExWP9VZoCFCz1zkJoXFnAX7aZfd/ZwrkidzdUZL0C/ryW+JwAiIGw==
 
 vue-draggable-taskflow@^1.0.1:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/vue-draggable-taskflow/-/vue-draggable-taskflow-1.0.5.tgz#8148e97578a61c3e4fd3bbe2837fef8e93d41773"
-  integrity sha512-Taydhz/Rcko5bY11iSSrKpgEOrFUkkBRbfX+3wwnHwnkJ14d91iR2q1ro6j6LAj5pFvc1NDSh+cTDkwMB3bDgw==
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/vue-draggable-taskflow/-/vue-draggable-taskflow-1.0.9.tgz#ff22763fd03d658d410eeceb32dd990747a8bbd3"
+  integrity sha512-FQmlHtVjWTYRZG6RbvDMXBypQY9xbND7WYy+QMKh7FIc6ofFOvbHYhkDT/SSzQZEqa9gxgp7JAP7lREO1mEbag==
   dependencies:
     less "^3.9.0"
     less-loader "^4.1.0"

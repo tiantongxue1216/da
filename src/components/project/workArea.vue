@@ -8,8 +8,6 @@
 </template>
 
 <script>
-import { timeout } from 'q';
-
 export default {
   components: {
   },
@@ -182,12 +180,12 @@ export default {
       }
     },
     zoomIn () {
-      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX + 0.1
-      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY + 0.1
+      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX + 0.05
+      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY + 0.05
     },
     zoomOut () {
-      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX - 0.1
-      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY - 0.1
+      this.ini.scaling.ZoomX = this.ini.scaling.ZoomX - 0.05
+      this.ini.scaling.ZoomY = this.ini.scaling.ZoomY - 0.05
     },
     //鼠标划入路径事件
     mouseOverFn (event, portData) {

@@ -31,14 +31,6 @@ export default {
           outPorts: [{
             type: '1',
             // isConnected: false
-          },
-          {
-            type: '2',
-            // isConnected: false
-          },
-          {
-            type: '3',
-            // isConnected: false
           }]
         },
         {
